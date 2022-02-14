@@ -1,0 +1,44 @@
+
+* Ccontenttypes framework
+- Provides a high level way of accessing referring to models in a project
+- It also allows for generic relationships
+- A way of mapping objects together without statically defining a model to a single other model.
+- The main use of the framework is to dynamically load models classes based on their name, and subsequently, query objects for that model.
+- The main model is ContentType
+- It is importable from django.contrib.contenttypes.model
+
+* Start Django shell
+python3 manage.py shell
+
+* app_label & model
+ContentType.objects.get_for_model(Post)
+
+* Once you call model_class() it’s just like you’ve imported the model.
+post_type = ContentType.objects.get(app_label="blog", model="post")
+post_type.model_class().objects.get(pk=1)
+
+* Generic Relationships
+- Cuando un Model puede relacionarse con mas de un solo Model.
+- content_type: ForeignKey field that points to a ContentType. Apunta a un Model.
+- object_id: PositiveIntegerField that stores the primary key of the related object.
+- content_object: A GenericForeignKey field, a special type of field that will look up the object from the other two new fields.
+(combo de los primeros 2, concatenacion casi)
+content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+object_id = models.PositiveIntegerField()
+content_object = GenericForeignKey("content_type", "object_id")
+- Si tiene estos nombres se pueden omitir los argumentos
+content_object = GenericForeignKey()
+- GenericForeignKey can’t be queried
+- El comment apunta a el ContentType y al Object_id
+
+* Reverse Generic Relationship & Generic Relationship Field
+- Add when there’s a model whose generic related objects you’ll be querying quite often
+- GenericRelation takes one argument: the generic model class to map to.
+- The comments attribute acts like a RelatedManager
+comments = GenericRelation(Comment)
+- Permite hacer la query en ambos sentidos y no en uno solo como la GenericForeignKey
+- Ahora desde Post podemos traer los Comments
+
+
+
+

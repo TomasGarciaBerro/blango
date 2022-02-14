@@ -1,0 +1,41 @@
+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
+
+
+* Start an app called blog
+python3 manage.py startapp blog
+
+* Run the database migrations
+- Para cambios en los Settings (settings.py)
+python3 manage.py migrate
+- Para cambios en los Models
+python3 manage.py makemigrations (lo prepara)
+python3 manage.py migrate (lo ejecuta)
+
+* Create user 
+- Needs to be to be able to log into the Django admin site
+python3 manage.py createsuperuser
+
+* Models
+- Son la estructura de la base de datos
+- Cada clase es una tabla y cada propiedad es un campo
+
+Author Foreign Key
+The author is a ForeignKey to settings.AUTH_USER_MODEL: a Django setting which is a string.
+By default, the value is auth.User, which refers to the User model in the Django auth application.
+To use the class, we need use the Django settings model. 
+from django.conf import settings
+
+A slug is a short string designed to be used as an identifier, such as in a URL
+Slugs are used for search engine optimization
+The slug is usually generated from the title of the page, with common words removed
+
+If you’re building a site that will output user-supplied HTML, consider using something like Bleach to remove unsafe HTML.
+
+* Importar Models a un script
+from blog.models import Tag, Post
+
+* Start the Django test server
+python3 manage.py runserver 0.0.0.0:8000
+
+* Django Admin system
+- A simple but powerful way to get content into your application
