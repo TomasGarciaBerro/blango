@@ -1,0 +1,43 @@
+
+* Custom Template Tags
+- If filters aren’t powerful enough to achieve the desired output in your template, 
+- The next step is to use template tags. 
+- Template tags are much more powerful and flexible. 
+- You have used a lot of template tags already:
+  -extends, as in {% extends "base.html" }
+  -block, like {% block content %}
+  -if and for template tags, for flow control
+- They accept arguments
+
+* Security
+- As was already mentioned, a library like Bleach should be used to sanitise the HTML output before being rendered
+
+* Simple Tags
+- They are the simplest way of creating a custom template tag. 
+- They are built with a function that can take any number of arguments (even 0). 
+- Like a custom filter, the function is created in a Python file inside the templatetags directory
+
+* Inclution Tags
+- {% include "blog/post-byline.html" %}
+- Very simple to implement
+- Main drawback: they can only access variables that are already in the including template’s context
+- Extra variables need to be passed in from the calling view
+- By using an inclusion tag, you can query for extra data inside your template tag function, which can then be used to render a template.
+- They are registered with the Library.inclusion_tag function
+- One required argument, the name of the template to render
+- Unlike simple tags, inclusion tags don’t return a string to render
+- Useful feature: fetch the five most recent posts, but excludes the current post being viewed
+- As with a simple tag, we can also pass the context to the inclusion tag function, by adding a context argument and adding takes_context=True to the decorator call.
+
+* Advance Template Tags
+- Simple template tags and inclusion tags should handle majority of your use cases for custom template tags. 
+- However, if you need even more customization, Django offers it (Advance Template Tags)
+- Como funciona Django:
+- When Django parses a template, 
+- It traverses it and breaks it into nodes (django.template.Node subclasses). 
+- It will then render each each node in turn, by calling its render function
+- Use cases
+- To capture the content (a list of Nodes) between two tags. You can then perform operations on each node, and choose how they’re output. 
+- For example, you could implement a custom permissions template tag that only outputs the content between them if the current user has the correct permissions.
+- To set context variables. A template tag could be used to set a value in the template context that is then accessible further on in the template.
+
