@@ -1,0 +1,35 @@
+* Django Custom Filters
+- In Django templates, you can pass data through filters before it’s rendered.
+- Les cambia el formato de salida, es como un CAST AS
+- A filter is just a function that takes a single argument and returns a string to be rendered in the template.
+
+*Template Tag File
+- Custom template tag libraries
+- Naming convention: [something]_extras.py
+
+* Directory Structure for Custom Template Tags
+- A directory: blog/templatetags
+- An empty __init__.py file inside blog/templatetags
+- An empty blog_extras.py file inside blog/templatetags
+
+* Register filter into the Template Library
+- from django import template
+- register = template.Library() al principio del archivo
+- @register.filter como decorator de la funcion
+
+* Safe Text
+- Built in filter safe which skips the encoding. (|safe)
+- If you know a string is safe to output verbatim. 
+- Only use this with your own values, and not mark any user-supplied data as "safe".
+
+* Django Utils
+- Escape dangerous user supplied data
+from django.utils.html import escape
+- Mark string safe (lo mismo que el filer pero para py)
+from django.utils.safestring import mark_safe
+- Hace todo en uno
+from django.utils.html import format_html
+
+
+
+
