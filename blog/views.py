@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.utils import timezone
 from blog.models import Post
 from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect
+from blog.forms import CommentForm
 
 # Create your views here.
 def index(request):
@@ -10,5 +12,26 @@ def index(request):
 
 def post_detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
-    return render(request, "blog/post-detail.html", {"post": post})
+    #CHEQUIAMOS SI ESTA LOGEADO
+    if request.user.is_active:
+        #CHEQUIAMOS EL REQUEST METHOD
+        if request.method == "POST":
+            #CREAMOS EL FORM CON LA POSTED DATA
+            comment_form = CommentForm(request.POST)
+
+            #CHEQUIAMOS SI LA DATA ES VALID
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.content_object = post
+                comment.creator = request.user
+                comment.save()
+                return redirect(request.path_info)
+        else:
+            comment_form = CommentForm()
+    else:
+        comment_form = None
+    return render(
+        request, "blog/post-detail.html", {"post": post, "comment_form": comment_form}
+    )
+
 

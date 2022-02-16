@@ -1,0 +1,61 @@
+* Rendering Django Forms
+1 Form subclasses have three built-in methods to render the entire form: 
+- as_table: to render each form element as a table row
+- as_p: to render each element in <p> tags
+- as_ul: to render inside a <ul> with each element in an <li>
+- Django doesn’t know about Bootstrap it renders the inputs and labels without any class attributes
+2 Rendering a single field: 
+- For example, a field called first_name could be rendered by adding {{ form.first_name }} to your template. 
+- Unfortunately you still have the same problem
+3 Accessing the individual attributes of a field and rendering them in HTML manually:
+<label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
+<input type="text" name="{{ form.first_name.html_name }}" id="{{ form.first_name.id_for_label }}" class="form-control">
+- Most flexible way
+- Lot of work if you add/remove fields to your form or change their name
+
+* Project Forms Setup
+- Solucion a los problemas anteriores
+- Django Crispy Forms is a third party library that provides filters, template tags, and a few Django form helpers, to make it easier to use forms with Bootstrap.
+
+* Install Crispy Forms
+- pip3 install crispy-bootstrap5
+- In settings.py
+- Add "crispy_forms" and "crispy_bootstrap5" to your INSTALLED_APPS.
+- Add the setting CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5".
+- Finally, add the setting CRISPY_TEMPLATE_PACK = "bootstrap5".
+
+* Crispy Forms
+- To render a Cripsy Form, you need to use one of the Crispy filters or template tags
+- The crispy filter is the easier method
+- {{ comment_form|crispy }}
+- Using the crispy filter doesn’t give an opportunity to customize the form rendering
+- We can use the crispy template tag along with some Crispy helper classes to move more of the output configuration into Python.
+
+* Crispy Template Tag and FormHelper Class
+- When rendering a form using just Django, it only renders the form’s fields. 
+- We have to add the <form> element wrapping it, the {% csrf_token %} template tag and the submit button
+- When submitting files through the form, we also need to set the attribute enctype="multipart/form-data" on the form.
+- The crispy template tag, can take care of all of these things for us
+- But we might need to set some options using a FormHelper instance
+- FormHelper is imported from crispy_forms.helper
+- We should implement a form’s __init__ method and have it assign self.helper to a FormHelper instance
+
+def __init__(self, *args, **kwargs):
+    super(CommentForm, self).__init__(*args, **kwargs)
+    self.helper = FormHelper()
+
+- Mirar la FormHelper documentation
+- Algunos de los atributos que podemos settiar:
+1 form_method: GET, POST
+2 form_action:  If you want the form to submit to a different page than the one on which it was loaded 
+3 form_id: The value to set as the id attribute of the <form> tag.
+4 form_class: The value to set as the class attribute of the <form> tag.
+5 attrs: A dictionary of attributes to set on the <form> tag.
+- Most of the time, you’d just use this to add a submit button to your form. 
+
+* Custom Form Layout
+- To customize the layout of your form, check out the layout documentation
+
+* Conclusion
+- The advantage of the crispy form tag is that you can move all your form setup into the form class, and just have a single line in your template to render it with all the right options it requires
+- Do all customization in Python
