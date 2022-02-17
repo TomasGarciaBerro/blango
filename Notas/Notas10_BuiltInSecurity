@@ -1,0 +1,45 @@
+
+* Django Security
+- Django doesn’t prevent brute-force logins or have built-in support for two-factor authentication
+- Django Defender can help with repeated login attempts
+- Sensitive data could be stored in a seperate database, like Vault (Credit Cards)
+- Credits Cards: tokenize them for rebilling and only store the token
+- SSL/TLS to encrypt data during transit. Add the setting SECURE_SSL_REDIRECT = True
+- Web server will need to be configured correctly for SSL for this to work though.
+- XML External Entities (XXE): If you do work with XML files, consider using defusedxml which prevents these attacks
+- Broken Access Control: Use login_required decorator
+- Make sure you’re fetching objects that belong to that user and not someone else
+- Security Misconfiguration: The most common issue. Django is secure by default. Asegurarse que los settings estan bien puestos.
+- Cross Site Scripting (XSS): Be sure to use the format_html function
+- Insecure Deserialization: If your application accepts serialized data from a user, you should be very careful about trusting it, and make sure it only contains absolute minimum necessary amount of data
+- Es aceptar que te metan bytes de info en vez de la info escrita
+- Insufficient Logging and Monitoring: You could use an Intrusion Detection System to help with alerting
+- Logging admin logins, failed login attempts, and other suspicious requests, as well as having a process for reviewing the logs regularly, is a good process to have in place
+
+* Hashing
+- How Django stores passwords
+- Trust Django’s built-in methods, and don’t write your own
+- To store passwords we should hash them
+- A hash function is a one-way method of encoding an arbitrary length data to a short string of bytes
+- The length of the output (the hash) is always the same for a particular hash function
+- Hashing is not encryption, as the hashed data can’t be decrypted to get the original data back
+- If our database is compromised then only the hash leaks, and not the users’ passwords
+- The next level of security is to add a salt: a small amount of random data that’s added to the password before it’s hashed, when it’s first set. 
+- The salt is stored unhashed, and is read and reused on password validation.
+- Hash functions have a problem: they are designed to be fast -> fast to brute-force login attempts
+- We can improve our security more by changing our hash function and using multiple iterations
+
+*Storing Passwords
+- The hash functions that Django can use are set using the PASSWORD_HASHERS setting
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+]
+
+- First element is the default algorithm that Django will use to hash passwords, but it is able to validate passwords hashed with the others in the list
+- The algorithm that Django recommends is Argon2
+- It is not enabled by default as it requires installing a third party library.
+pip3 install django[argon2]
+django.contrib.auth.hashers.Argon2PasswordHasher
