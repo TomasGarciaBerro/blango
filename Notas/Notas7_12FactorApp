@@ -1,0 +1,16 @@
+* 12 Factors:
+- Codebase
+- Dependencies
+- Config
+- Backing Services
+- Build, Release, Run
+- Processes
+- Port Binding
+- Concurrency
+- Disposability
+- Dev/Prod Parity
+- Logs
+- Admin Processes
+
+- https://12factor.net/
+- They are not specific to any particular language

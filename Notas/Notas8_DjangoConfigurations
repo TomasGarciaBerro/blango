@@ -1,0 +1,77 @@
+
+* Environment variables
+- A process inherits the environment variables of the process that launched it
+- In Python they are aveilable in the os.environ variable, which is kind-of like a dictionary
+- You can retrieve any of the environment variables using get() method.
+environ.get()  
+- Its like the dict.get() method
+- Setting a envirorment variable
+MUST_BE_SET="is now set" OPTIONAL="an optional value"
+- They also can be set with the export command, and they will be set for all subsequent commands in the shell
+export MUST_BE_SET="set in export"
+- To unset them
+unset PYTHON_DEFAULT
+- When deploying a Django application to production
+- They are executed through an app server that’s started by the operating system
+- These have environment variables in a configuration file that are read and then fed through to Python/Django.
+- Alternatively, when using a cloud app server or container service, there might be a web GUI to set the environment variables which are passed to the process.
+
+* Installing Django Configurations
+- pip3 install django-configurations dj-database-url
+
+* Updating settings.py
+- Django Configurations moves settings into classes
+- Common pattern: 
+- Debug class which stores most your settings
+- Production class that inherits from it
+- Production class can override certain settings, like forcing DEBUG to False for security
+- The classes inherit from configurations.Configuration
+- With Django Configurations, settings should be a part of the Dev class
+from configurations import Configuration
+class Dev(Configuration):
+  <todas las setting de antes>
+
+* Updating manage.py
+- We also need to make some changes to the entry point scripts (manage.py and wsgi.py
+- Cambiamos
+from django.core.management import execute_from_command_line
+- Por
+from configurations.management import execute_from_command_line
+
+* Updating wsgi.py
+- wsgi.py is used by an application server to load your web server, when you deploy to production
+- Cambiamos 
+from django.core.wsgi import get_wsgi_application
+- Por
+from configurations.wsgi import get_wsgi_application
+- Pero lo ponemos despues del 
+os.environ.setdefault("DJANGO_CONFIGURATION", "Prod")
+
+* How to tell Django Configurations which environment variables values read
+- We must specift configurations.values.Value (or one of its subclasses), for those values that are to be read.
+- By default, the environment variable names are prefixed by DJANGO_, for example, TIME_ZONE is read from DJANGO_TIME_ZONE.
+- It can be changed with
+TIME_ZONE = values.Value("UTC", environ_prefix="BLANGO")
+- The Value class is the simplest type of configuration, it just reads a string from an environment variable and sets it to a particular setting
+
+* Parsing Other Configuration Types
+- Settings can be booleans, lists, dictionaries and more
+- Django Configurations provides a number of Value subclasses that parse these values from strings, and validate their format
+- Define Prod class
+class Prod(Dev):
+  DEBUG = False
+  SECRET_KEY = values.SecretValue()
+- For boolean values we use the following
+DEBUG = values.BooleanValue(True)
+- Usamos SecretValue para que nos impida que quede una key hardcodeada en el codigo
+- Para listas usamos el siguiente
+ALLOWED_HOSTS = values.ListValue(["localhost", "0.0.0.0", ".codio.io"])
+- DatabaseURLValue, parses a database URL into a dictionary for Django’s DATABASES setting
+- It requires
+import dj_database_url
+- DatabaseURLValue doesn’t read the value from the environment variable DJANGO_DATABASES, as you would expect from the convention seen so far. 
+- Instead, it reads from the environment variable DATABASE_URL
+- Tambien esta dj_database_url.config() para cuando tenemos dbs alternativas
+- Full list of Value Subclasses
+https://django-configurations.readthedocs.io/en/stable/values/#value-class
+
