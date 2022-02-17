@@ -1,0 +1,125 @@
+
+
+* Logging Intro
+- 12-Factor method of logging: log to stdout/the console
+- Logging consists of four parts
+1 Loggers
+2 Handlers
+3 Filters
+4 Formatters
+- Each have a configuration dictionary
+
+* Loggers
+- Entry point to the logging system
+- Named bucket that messages get written to
+-Log levels: describes the severity of the message
+DEBUG: Low level system information for debugging purposes
+INFO: General system information
+WARNING: Information describing a minor problem that has occurred.
+ERROR: Information describing a major problem that has occurred.
+CRITICAL: Information describing a critical problem that has occurred.
+- After you have a logger, you can write a Log Record to it
+- Log record consists of a message, a log level, and optionally some metadata
+- A logger will only handle messages at its log level or higher
+- A logger at log level WARNING will handle WARNING, ERROR and CRITICAL messages, but not DEBUG or INFO
+
+* Handlers
+- After a logger receives a log record that exceeds its log level, it’s passed on to a Handler. 
+- The handler decides where the log record will go
+- The handler also has its own log level, so it will only handle log records which match or exceed that.
+- A logger can have multiple handlers, so you could have a handler that messages admins for ERROR and CRITICAL alerts
+
+* Filters
+- A filter controls how data log records are passed from logger to handler
+
+* Formatters
+- Before a log message is output, it is formatted, by a formatter
+
+* How To Log
+- Logging in Python is done using the logging module
+import logging
+- Convention is to pass in the special variable __name__, which is the name of the current module
+logger = logging.getLogger(__name__)
+- If no configuration is specified for a module, then Python falls back to using the configuration for root
+
+- Methods
+logger.debug()
+logger.info()
+logger.warning()
+logger.error()
+logger.critical()
+
+- Structure
+logger.debug(msg, *args, **kwargs)
+
+- Incorrect way
+logger.debug("Created user %s with email %s" % (username, email))
+- Correct way
+logger.debug("Created user %s with email %s", username, email)
+- **kwargs can contain other values for adding metadata to the log record
+- Read about them at the Python logging documentation
+https://docs.python.org/3.9/library/logging.html#logging.Logger.debug
+
+- Other Methods
+- logger.log(): adds a level argument so that they level can be provided dynamically
+logger.log(logging.DEBUG, "Created user %s with email %s", username, email)
+- logger.exception(): logs the current exception and stack trace, if called inside an except handler
+- It logs at log level ERROR
+- It automatically determines the current exceptio
+try:
+    # some code that might raise an exception
+    raise_exception()
+except ValueError:
+    logger.exception("An exception occured")
+
+- The convention when creating a logger is to define it as a module-level variable called logger
+
+* Adding Logging to a Django Project
+- Logging configuration in settings.py
+- ID are arbitrary, but it’s good to pick one that makes sense
+
+* Handlers
+- StreamHandler class logs to STDERR, so we change it to stdout by setting its stream argument to the URL ext://sys.stdout
+- STDERR (standard error) is the default file descriptor where a process can write error messages
+- STDOUT (standard output) is the default file descriptor where a process can write output
+- There is a list of all the Python handlers available at the logging handlers documentation
+https://docs.python.org/3.9/library/logging.handlers.html
+- Por ejemplo hay otro que es FileHandler, escribe a un file
+- Following the 12 Factor app we want to log all log records to stdout and allow the operating system to configure how they’re routed later
+
+* Formatters
+- To allow routing by showing the log level, the time of the message and the process/thread ID, we should use a formatter
+- {process:d} {thread:d} process and thread id
+
+* Non 12-Factor Considerations: Emailing Admins
+- SMTP (Simple Mail Transfer Protocol)
+- "admin users": users listed in the ADMINS setting
+ADMINS = [("Ben Shaw", "ben@example.com"), ("Leo Lucio", "leo@example.com")]
+- To read these from an environment variable with Django Configurations -> SingleNestedTupleValue
+- Environment variable:
+DJANGO_ADMINS="Ben Shaw,ben@example.com;Leo Lucio,leo@example.com"
+- Alerts-on-exception emails are triggered by the log handler django.utils.log.AdminEmailHandler
+- Hay que agregar este filter para que solo salten cuando esta en produccion 
+"filters": {
+    "require_debug_false": {
+        "()": "django.utils.log.RequireDebugFalse",
+    },
+},
+- Este handler
+"mail_admins": {
+    "level": "ERROR",
+    "class": "django.utils.log.AdminEmailHandler",
+    "filters": ["require_debug_false"],
+},
+- Y este logger
+- So that exceptions are only sent when they where unhandled
+"loggers": {
+    "django.request": {
+        "handlers": ["mail_admins"],
+        "level": "ERROR",
+        "propagate": True,
+        #PARA QUE TMB SE MANDE A LA CONSOLE
+    },
+},
+
+
