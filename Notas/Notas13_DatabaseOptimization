@@ -1,0 +1,88 @@
+
+* Introduction to Optimization
+- We should’t waste time implementing optimizations unless we know that they will fix the bottlenecks of our application
+
+* Django Debug Toolbar
+- Third party library that adds a toolbar to the side of your pages rendered by Django
+- Logging: with a custom LOGGING setting, we won’t see anything in this panel. 
+This StackOverflow Answer details how to re-add the DjDT logger handler to the LOGGING setting
+https://stackoverflow.com/questions/2615042/how-do-i-use-logging-in-the-django-debug-toolbar/48291899#48291899
+
+* Installing & Configuring Django Debug Toolbar
+- For security, DjDT will only show up for clients whose IP address you’ve designated as being allowed
+- local machine: 127.0.0.1
+- pip3 install django-debug-toolbar
+INSTALLED_APPS = [
+    # other existing settings truncated for brevity
+    "debug_toolbar",
+]
+MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # other existing settings truncated for brevity
+]
+INTERNAL_IPS = ["192.168.11.179"]
+- In urls.py
+import debug_toolbar
+from django.urls import path, include
+if settings.DEBUG:
+    urlpatterns += [
+        path("__debug__/", include(debug_toolbar.urls)),
+    ]
+
+* Database Indexes
+- Its like a lookup table that the database stores to tell it where to locate records
+- Add in column definition in models.py
+db_index=True
+- Why not many indexes
+- Takes time to update an index when a record is inserted or updated, which can slow down these processes
+
+* Explaining QuerySets
+- explain() method on a QuerySet will return a string in the same format as what you’ve seen in the Explain panel of DjDT
+
+* Selecting Related Objects
+- select related es como un join y se hace con select_related() method a un QuerySet
+- It takes one or more string arguments, which are the name of the fields for which to fetch related objects
+select_related("author")
+- Se usa cuando sabes que vas a hacer el mismo join para varios datos
+
+* Fetching Only Some Columns
+- Fetching data with the Django ORM is a two-stage process
+1 The data must be retrieved from the database
+2 Data is converted from raw bytes into a Python object (a model instance)
+- If we don’t need all the data for a particular model
+- We can use the QuerySet methods defer() and only() to control which columns are retrieved and converted to Python
+defer()
+- Which columns not to load
+only()
+- Which columns to load
+- only() and defer() doesn’t always give us a speed boost
+- Most of the overhead is in creating connections and filtering, not sending back the data
+- Solo se usan cuando encuentro ese problema, no trato de prevenir
+- Method’s arguments need to be kept up to date (pijaso)
+- Preferentemente usar defer()
+
+* Bulk Create
+- bulk_create() method on the model classes manager
+Post.objects.bulk_create()
+- Takes 3 arguments
+1 obj: list of objects to insert, they must be instances of the same model class
+2 batch_size (optional): number of objects per query
+3 ignore_conflicts (optional): ignore any fails due to duplicate constraints
+
+* Bulk Update
+- bulk_update() on the object manager
+- Takes 3 arguments
+1 obj: list of objects to insert, they must be instances of the same model class
+2 fileds: list of fields to update
+3 batch_size (optional): number of objects per query
+- update() method on a QuerySet
+- Can be more efficient as you don’t need to first fetch all the objects from the database and update them in Python code
+- The operation is performed entirely in the database
+- Downside is that all objects must have the column set to the same value
+- Takes keyword arguments of the values to set
+- Post.objects.all().update(published_at=None)
+
+* Bulk Delete
+- performed on a QuerySet, with the delete() method
+
+
