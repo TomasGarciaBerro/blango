@@ -1,0 +1,179 @@
+
+* Caching
+- Caching is a way of speeding up programs by storing the results of computationally heavy operations, 
+- And referring directly to the result instead of calculating it again the next time it’s needed
+- Example
+if key in cache:
+    # get the value from the cache if it exists
+    value = cache.get(key)_
+else:
+    # calculate the value and store it in the cache so it can be fetched next time
+    value = calculate_value_for_key(key)
+    cache.set(key, value)
+- Cache service has key, value and timeout
+cache.set("post_count", post_count, 300)
+- Cache a value forever, delete when it changes
+cache.delete(f"post_content_{self.pk}")
+
+* Options for Caching Backends
+- Memcached: It listens on a TCP port and multiple Django processes can share the same Memcached backend
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION"": "127.0.0.1:11211",
+    }
+}
+- We need to pip install it
+- If it crashes or is restarted it will lose all cached values (not a critical problem)
+- By default it can only store values of 1MB per key (no deberia tener problemas)
+
+- Database caching
+- This can be fast, but probably not as fast as in-memory cache
+- It is persistent though and will survive crashes
+- You don’t need to install any other applications.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "my_cache_table",
+    }
+}
+- The caches are stored in the table specified by the LOCATION key (my_cache_table)
+- The cache table needs to be created before it can be used
+$ python manage.py createcachetable
+- Multiple Django processes across multiple machines can share the same database cache.
+
+- Filesystem Caching
+- This can be fast, depending on the speed of your drive, but probably not as fast as in memory caching
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "/var/tmp/django_cache",
+    }
+}
+- It is persistent though
+- The LOCATION setting is an absolute path of a directory, which must exist
+- Multiple Django processes on a single machine can share the cache
+
+- Local-memory Caching
+- Cache data in memory, inside its own Python process. 
+- This can give you the speed advantages of in-memory caching without having to set up Memcached
+- It can’t be shared across multiple Django instances
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
+}
+- The LOCATION setting is not required, unless you have multiple local-memory caches
+- Default backend that Django uses
+
+- Dummy Caching 
+- Has a cache interface but doesn’t actually cache anything
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    }
+}
+- Only for development purposes
+- You can “cache” data to check that your caching code is being called correctly
+
+* Other Cache Arguments
+- See documentation
+- TIMEOUT, the default timeout in seconds if no timeout is specified when setting a value
+- KEY_PREFIX, a string that’s prepended to each key you use.
+
+
+- For development we’re going to stick with the LocMemCache
+- Don’t need to change any settings
+
+* View Caching
+- Simplest way to add caching
+- This means caching the output (response) from a view function, based on its arguments
+- It is set up with the django.views.decorators.cache.cache_page function 
+- It is used as a decorator
+- It takes one required argument, the number of seconds that the response should be cached for
+from django.views.decorators.cache import cache_page
+@cache_page(300)
+- Use carefully though
+- It assumes that the response from the view is only generated based on the URL, and no other parts of the request
+- Posible security flaw you could introduce is if you decided to cache any page whose content depends on the logged-in user
+
+- Alternative
+- Decorating the view function with the django.views.decorators.vary.vary_on_headers function
+- This function’s parameters are names of the headers that will cause the response to vary
+@cache_page(300)
+@vary_on_headers("Cookie")
+- Si es justo para cookies hay que usar
+django.views.decorators.vary.vary_on_cookie
+@vary_on_cookie
+
+* Template Fragment Caching
+- We don’t have to cache the entire response
+- Django gives us the ability to cache template fragments
+- Two steps:
+- Load the cache template tags by adding a {% load cache %} near the top of your template.
+- Wrap any code you want cached in {% cache %} and {% endcache %} tags.
+- Cache takes two required positional arguments: the timeout, in seconds, and the cache name.
+- How do we know it’s working: add some logging
+- We can add extra arguments to the cache template tag to make it more specific
+{% cache 3600 recent_posts post %}
+
+* Lower Level Cache API
+- Dictionary containing all cache instances, at django.core.cache.caches
+- The keys to this dictionary match the keys of the CACHES setting
+- We’re just using one: default
+- Si quisieramos traer todos
+from django.core.cache import caches
+default_cache = caches["default"]
+- Para solo traer el default
+from django.core.cache import cache
+# cache is the equivalent of caches["default"]/our default_cache variable
+- To set value we have to use the set() method.
+- It takes 4 arguments:
+1 key
+2 value
+3 timeout (optional)
+4 version (optional): 
+- Version: if you change the format of data this is stored when you deploy a new version of your application
+- Any old values in the cache will still work for older versions that might still be running
+- To retrive use get()
+- Takes 3 arguments
+1 key
+2 default (optional): value to return if the cache key doesn’t exist
+3 version (optional)
+- When there is a change and we whant to delete cache, use delete()
+- Takes 2 arguments
+1 key
+2 version (optional)
+- set_many() takes 3 arguments
+1 data: key value dictionary
+2 timeout
+3 version
+- set_many() returns a list of all the keys that failed to be set in the cache
+- get_many() takes 2 arguments
+1 key: a list of keys
+2 version (optional)
+- delete_many() takes 2 arguments
+1 list of keys
+2 version (optional)
+- get_or_set(): Will get a value from the cache, or set it if it doesn’t already exist
+- Takes four arguments
+1 key
+2 default (value to store if it doesnt exist) (puede ser una funcion)
+3 timeout (optional)
+4 version (optional)
+add(key, value, timeout=DEFAULT_TIMEOUT, version=None)
+- Set a value in the cache but only if they key doesn’t already exist.
+touch(key, timeout=DEFAULT_TIMEOUT, version=None)
+- Refresh the timeout of the key, that is key will now expire timeout seconds from now
+incr(key, delta=1, version=None)
+- Increment an integer value that’s set in for key, by delta, then return the new value
+decr(key, delta=1, version=None)
+- The opposite of incr()
+has_key(key, version=None)
+- Return True if key is in the cache and not expired, False otherwise
+clear()
+- Removes all the values from the cache
+
+
+
