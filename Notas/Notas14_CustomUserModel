@@ -1,0 +1,37 @@
+
+* Custom User Model
+- Add extra fields to the User
+- Or allow logging in with an email address instead of an username
+- The recommendation is to use a custom User model right from the start of the Project
+
+* HOw to set it up
+- Create a Model class which inherits
+django.contrib.auth.model.AbstractUser
+- This can be in any app in your project
+- But you should consider creating an app just for authentication-related models, templates, forms and views
+- python3 manage.py startapp blango_auth
+- Add the AUTH_USER_MODEL = "blango_auth.User" setting
+- Register the Model in the admin.py
+from django.contrib.auth.admin import UserAdmin
+from blango_auth.models import User
+admin.site.register(User, UserAdmin)
+- That’s it, Django will use your User model instead
+
+* Profile Models
+- Extra data can be stored for a User
+- Either by adding attributes to the User model
+- (Data that is more fundamental to identifying your user)
+- Or by relating a different model to the user with a OneToOneField
+- (Data that could be optional, or is not related to identifying the user)
+- It should we in the project which will use ir, no in the auth one
+class AuthorProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
+    )
+    #Other fields
+
+* Logging in with Email Address
+- Todos los pasos detallados en el curso
+- (es bastante codigo)
+
+
