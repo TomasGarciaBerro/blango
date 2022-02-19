@@ -1,0 +1,44 @@
+
+* Introduction & Purpose
+- Django Allauth is an extensive library that handles just about every aspect of account management and authentication in Django
+- Since we've already implemented login and registration with other means, we will just be using Django Allauth for social login
+- If you do want social authentication, it's best to not remove the username field from a custom User model, as it makes it easier for Django Allauth to save the user data
+- To save the mapping, and other things, Django Allauth uses these models
+- SocialApp, SocialAccount, SocialToken
+- Integrating social authentication is similar for every provider.
+1 Create an account with the third-party provider, and set up an authentication application with them.
+2 The third party provides you with a client ID and secret key
+3 Add a SocialApp object to the Django database, provide the client ID and secret key for your application.
+4 Add a link/button to your login page to initiate the third-party workflow.
+
+Client ID: 772970598203-2i44f5ivfitmj3bvalkvtlticjejaeoo.apps.googleusercontent.com
+Client Secret: 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
+
+* Django Allauth Setup
+pip3 install django-allauth
+- Add in settings, installed apps
+'django.contrib.sites'
+- Django Sites app/framework is a way for two sites/domains to share the same Django project
+- You would do this if you had two similar sites, such as two sister news sites, that shared the same models, data and views
+- Each site can have its own settings and templates, and you could, for example, choose if a news story was displayed in one or both of the sites
+- Check out the Sites framework documentation
+- Sites framework so that different SocialApp objects can be assigned to different sites
+'allauth', 
+'allauth.account', 
+'allauth.socialaccount', 
+'allauth.socialaccount.providers.google',
+- The first three are required, and then you’ll add the provider modules that you’re using for authentication
+- Add settings
+SITE_ID = 1
+- Para trabajar con email y no con username
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+- Django Allauth provides a named URL for each of its providers
+{% url "google_login" %}
+
+- In a real site, don’t use both Django Registration and Django Allauth together. Just use one.
+- Django AllAuth to handle verification of emails 
+- Add ACCOUNT_EMAIL_VERIFICATION = True setting
+
