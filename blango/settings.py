@@ -38,23 +38,26 @@ class Dev(Configuration):
     CSRF_COOKIE_SAMESITE = 'None'
     SESSION_COOKIE_SAMESITE = 'None'
 
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
     # Application definition
 
+    AUTH_USER_MODEL = "blango_auth.User"
+    ACCOUNT_ACTIVATION_DAYS = 7
+    
     INSTALLED_APPS = [
+        'blango_auth',
         'django.contrib.admin',
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
-        'blango_auth',
         'blog',
         'crispy_forms',
         'crispy_bootstrap5',
         'debug_toolbar',      
     ]
-
-    AUTH_USER_MODEL = "blango_auth.User"
 
     MIDDLEWARE = [
         'debug_toolbar.middleware.DebugToolbarMiddleware',

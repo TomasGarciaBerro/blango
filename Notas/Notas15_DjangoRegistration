@@ -1,0 +1,51 @@
+
+* Intro To Django Registration
+- Third-party library 
+- Provides URLs, views and forms to support registration
+- Supports both a “one-step” workflow, and a “two-step activation” workflow
+- The key for the two-step activation workflow actually contains the username in an encoded format
+- By decoding the key and checking when the user signed up request can be validated without any extra data needing to be stored in the database
+
+* Profile View
+from django.contrib.auth.decorators import login_required
+@login_required
+- Overriding the look
+- Move blango_auth to be before django.contrib.admin in the INSTALLED_APPS setting
+
+* Django Registration One-Step Workflow
+pip install django_registration
+path('accounts/', include('django_registration.backends.one_step.urls')),
+- We need to add some templates for Django Registration to render
+django_registration/registration_form.html
+django_registration/registration_complete.html
+django_registration/registration_closed.html
+(Gives the ability to disable registration by adding REGISTRATION_OPEN = False to your settings.py)
+- If we are using a custom User model
+- We have to create a RegistrationForm subclass and set the model class to the custom User model
+
+* Two-Step Activation Workflow
+- Todo muy parecido salvo que
+- registration_complete.html: Instead of being shown when a user’s account is active, it’s shown after the user has completed the register form
+- And should have a message letting them know they should check their email to complete registration.
+- Other templates
+django_registration/activation_failed.html
+django_registration/activation_complete.html
+django_registration/activation_email_subject.txt
+django_registration/activation_email_body.txt
+- URL pattern (No Custom User Model)
+path('accounts/', include('django_registration.backends.activation.urls')),
+- URL pattern (Custom User Model)
+from django_registration.backends.activation.views import RegistrationView
+from blango_auth.forms import BlangoRegistrationForm
+urlpatterns = [
+    …
+    path(
+        "accounts/register/",
+        RegistrationView.as_view(form_class=BlangoRegistrationForm),
+        name="django_registration_register",
+    ),
+    path("accounts/", include("django_registration.backends.activation.urls")),
+    …
+]
+- Settings
+ACCOUNT_ACTIVATION_DAYS = 7
