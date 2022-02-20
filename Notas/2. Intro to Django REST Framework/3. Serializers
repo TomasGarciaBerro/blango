@@ -1,0 +1,128 @@
+
+* Introduction
+- Probably the most fundamental part of an API is converting data from the native variables/objects into a serialized form that’s suitable for transmission
+- DRF uses Serializer classes to perform this back and forth conversion
+- You can kind-of think of them like Django forms, in a very loose way
+- Django forms:
+1 Use Python data to populate the initial values of a form
+2 Display in HTML on a web page
+3 Accept data posted by the browser
+4 Validate it
+5 Convert it to Python objects.
+- Serializer:
+1 Converts Python objects into a form suitable for transmission over HTTP
+2 It accepts data in an HTTP request body
+3 Validates it
+4 Converts it back to Python.
+- Like how Django provides Form and ModelForm base classes
+- DRF provides Serializer and ModelSerializer classes
+- ModelSerializer makes it easier to automatically create a serializer from existing models
+
+* Setup
+- Base class: rest_framework.serializers.Serializer
+- When using serializers, you subclass the base class and add fields, then interact with that subclass.
+- Like with Django Forms
+- A serializer can be used to serialize or deserialize any type of object, provided that the fields of each match
+pip3 install djangorestframework
+- Serializer fields are also kind of like Django form or model fields
+- They have a type, can have validation rules and perform the conversions to and from Python native objects.
+password = serializers.CharField(write_only=True, required=False)
+- write_only=True: don’t include in the output when the User object is serialized
+- required=False: don’t needed to create or update
+- read_only=True: can’t be set nor changed
+
+* Serializing
+- Transform object into a dictionary
+- The serialized data is not JSON
+- Dictionary-to-string process is separate
+- For example
+import json
+json.dumps(s.data)
+
+* Deserialize
+- Pass data through data argument
+u2 = {"username": "tharrison", "join_date": "2021-08-09T22:15:27.934034Z"}
+s2 = UserSerializer(data=u2)
+- To show the errors to the user, you should check that is_valid() returns False and then return a response containing serializer.errors
+
+* Saving Data
+- Create
+user_data = {"username": "tharrison"}
+serializer = UserSerializer(data=user_data)
+if serializer.is_valid():
+    serializer.save()
+
+- Updat
+- Si le pasas la instace ya sabe que es update
+user = User("cwilson", "cwilson@example.com", "Callum", password="p4ssw0rd")
+user_data = {"username": "tharrison", "first_name": "Tony", "last_name": "Harrison"}
+serializer = UserSerializer(user, data=user_data)  # pass User instance as first argument
+if serializer.is_valid():
+    serializer.save()
+
+* Multiple Objects
+- Pass many=True
+multi_serializer = UserSerializer(users, many=True)
+- When deserializing multiple objects, the save() method only supports creation
+
+* Custom Validation
+There are three methods of performing custom validation:
+1 Field-level validation 
+2 Object-level validation
+3 Validator functions
+
+- Field-Level Validation
+- Methods added to your Serializer, named in the format validate_<field_name>()
+- The method is passed the deserialized value as an argument, and should return the value if it’s valid
+- This means as well as validating you can transform the value inside the validate method.
+- Validate methods are only called if the field classes’ own validators pass
+def validate_email(self, value):
+        value = value.lower()
+        domain = value.split("@")[1]  # safe to do since we know value is valid email address
+        if domain != "example.com":
+            raise serializers.ValidationError("domain must be example.com")
+        return value
+
+- Object-Level Validation
+- When we nee to validate two different fields against each other
+- Adding a validate() method to serializer class
+- It accepts a single argument, data, which is a dictionary of deserialized data
+- This dictionary should also be returned from the function
+- You can validate data, raise a serializers.ValidationError on error, or make changes to the data dictionary
+def validate(self, data):
+        if (not data.get("first_name")) != (not data.get("last_name")):
+            raise serializers.ValidationError("first_name and last_name must be provided together")
+
+        return data
+
+- Validator Functions
+- These are functions that have one argument, the value to validate
+- They should raise serializers.ValidationError if an exception occurs, or do nothing (not return anything) if the value is valid
+- They are useful if you want to apply the same validation to multiple fields
+def is_capitalized(value):
+    if value[0].lower() == value[0]:
+        raise serializers.ValidationError("Value must be capitalized")
+- The validator is passed to a field class using the validators argument, which must be a list of validators
+
+* ModelSerializer
+- Create a Serializer directly from a Django model
+- Similar to creating a Form from a Django model with ModelForm
+- To create a ModelSerializer we need to to specify a model on its Meta attribute
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = "__all__"
+- It saves and updates like a normal serializer
+- Argument partial=True: Serializer will only validate the values passed into the data and won’t trigger an error if required fields are missing
+- It will just use the current value for any required fields
+- However you can’t create new instances
+- We also can override or add fields by adding fields as attributes.
+- If we add fields we also have to delete them afterwars, if not create method will cause exeptions
+- To mark fileds as read only
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        readonly = ["modified_at", "created_at"]
+
+* Settings
+- Add 'rest_framework', to INSTALLED_APPS
