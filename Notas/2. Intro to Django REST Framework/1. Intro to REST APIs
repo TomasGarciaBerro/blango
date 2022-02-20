@@ -1,0 +1,15 @@
+
+* Why do we want a computer to be able to “read” a web page?
+- To be able to interact with it using a different interface
+- Usually a mobile application, but also different web applications that you, or others, may build.
+
+* REST
+- REST stands for REpresentation State Transfer
+- Any system designed in such a way can be described as RESTful.
+- It uses of standard HTTP verbs (GET, POST, PUT and DELETE), and consistent (and optionally hierarchical) URL
+- The responses should be some kind of structured text, like JSON
+
+* REST vs Non-REST
+- REST is only geared towards web applications. And mostly deals with HTTP requests and responses
+
+

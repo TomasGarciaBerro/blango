@@ -1,0 +1,52 @@
+
+
+* Django Rest Framework
+- DRF for short
+
+* What We Will Develop 
+- List all Post objects
+- Get the full detail for a single Post object
+- Create a new Post object
+- Update an existing Post object
+- Delete a Post object
+
+- So while it will handle all our use cases, it won’t do 
+- Validation
+- Error handling
+- Authentication
+
+* Django Response Classes
+- JsonResponse: It automatically encodes whatever data it’s been passed into a JSON string
+- Sets the Content-Type header of the response to application/json
+return JsonResponse({"pk": post.pk, "summary": post.summary})
+- HttpResponse: Allows us to return empty responses with status codes to nominate what they mean
+- 204 means No Content: Body of the response is expected to be empty
+return HttpResponse(status=HTTPStatus.NO_CONTENT)
+- 201 which means Created
+return HttpResponse(
+    status=HTTPStatus.CREATED,
+    headers={"Location": reverse("api_post_detail", args=(post.pk,))},
+)
+- HttpResponseNotAllowed: We’ll return this if a request is made using a method that’s not supported
+- Sends a 405 status code
+- This class should be passed a list of HTTP methods that are acceptable
+return HttpResponseNotAllowed(["GET", "POST"])
+
+* CSRF
+- Django will reject requests that don’t include a CSRF token
+- Unless the view is marked as not requiring one
+- This is done with the django.views.decorators.csrf.csrf_exempt decorator.
+@csrf_exempt
+- csrf_exempt can be considered a security risk
+- But as we’re specifically designing views for use with a REST API we would expect to have some other method of authenticating the user and requests
+- So CSRF protection is not really required.
+
+* Transforming Objects
+- Django models or QuerySets are not serializable by the JsonResponse view
+- Funcion que nos lo convierte a diccionario
+def post_to_dict(post):
+    return {
+        "pk": post.pk,
+        "author_id": post.author_id,
+        ...
+    }
