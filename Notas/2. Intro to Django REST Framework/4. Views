@@ -1,0 +1,68 @@
+
+* View functions and Response objects
+- DRF provides a lot of helper classes to let you write less code
+- DRF also provides a decorator to mark view functions as API methods
+- The decorator rest_framework.decorators.api_view can be applied to view functions
+- It automatically rejects unsupported methods by returning a response with a 405 status code
+- It parses the request data, including handling errors. Other content types can be handled too
+- It handles the DRF Response object, returning different responses based on what the client wants
+- Argument: A list of acceptable HTTP methods
+@api_view(["GET", "POST"])
+- The decorator also adds data attribute to the request
+- Now we have request.data
+- Now we can start using rest_framework.response.Response objects instead of JsonResponse
+return Response(status=HTTPStatus.NO_CONTENT)
+return Response(PostSerializer(post).data)
+- We hace to replace get_object_or_404 with
+try:
+    post = Post.objects.get(pk=pk)
+except Post.DoesNotExist:
+    return Response(status=HTTPStatus.NOT_FOUND)
+
+* Optional Format Suffixes
+from rest_framework.urlpatterns import format_suffix_patterns
+- At the end
+urlpatterns = format_suffix_patterns(urlpatterns)
+- Delete last "/" from details urls
+- Add format=None as argument in the views
+def post_list(request, format=None):
+- Now we can asj for different formats
+http://127.0.0.1:8000/api/v1/posts/5.json
+
+* APIView
+- The rest_framework.views.APIView class is a base class you can inherit from to define API views as class-based views
+- Now we are usig function-based views
+- Hay un ejemplo
+- Instead of branching inside the view function, we “branch” by having dedicated methods that are called for each request method type
+- By inheriting from APIView, we’ll also have the same benefits as afforded to us by the api_view decorator.
+
+* Generic views and mixins
+- DRF uses the mixin pattern to add functionality to generic views
+- Mixins means building your class and inheriting from multiple parent classes
+- We still need to define methods to respond to each HTTP request type
+- But now its only 1 line
+class PostList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+- The list method uses the queryset and serializer_class to do all the work
+
+* Advanced generic views
+generics.ListCreateAPIView
+- Gives us all what we need for list api views
+class PostList(generics.ListCreateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+- This is all we need
+generics.RetrieveUpdateDestroyAPIView
+- Gives us all what we need for detail views
+
+
+
+
+
+
+
+
