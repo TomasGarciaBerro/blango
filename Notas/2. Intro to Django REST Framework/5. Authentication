@@ -1,0 +1,50 @@
+
+* Intro
+- Two pieces: authentication and permissions
+
+* Authenticating with the session
+- Standard way: log in with a username and password using a form
+- This user information is then stored in the session, on the backend
+- The session is identified by a cookie sent by the browser.
+- Using session authentication is not ideal for use with an API
+- DRF provides a login set up (we already have 2)
+urlpatterns += [
+    path("auth/", include("rest_framework.urls")),
+]
+
+* Basic authentication
+- Basic authentication involves sending the username and password with each request.
+- These are joined by a :, then base-64 encoded, and sent in the Authorization header
+Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+- The string is username:password encoded by base-64.
+- Postman can be set to use Basic authentication
+- To provide HTTP basic auth using the requests framework, we can use the requests.auth.HTTPBasicAuth class
+- Drawbacks:
+- Users have to give their username and password to third party services
+- Password can be intercepted and decoded (HTTPS prevents it anyway)
+- On the backend, we don’t have an easy way to figure out which specific service is making API requests as they all share the same credentials
+- We can’t specifically rate-limit or disable access to a particular bad client/service without completely blocking that user
+
+* Token Authentication
+- Token authentication works by passing a token (a long, random string) in the Authorization header
+- The backend server can then map the token back to a user and authenticate them without a username and password
+- Benefits:
+- We can provide different tokens to different API clients
+- Tokens can be revoked to remove access to a particular client
+- Our username and password are not sent in every request
+- DRF’s built-in token only allows one token per user
+- JSON Web Tokens is more flexible and does let us
+- rest_framework.authtoken must be added to INSTALLED_APPS
+- Also we have to include this setting
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+    ]
+}
+- DRF tokens are stored in the database, as a Token model object
+
+* Applying authentication classes to views
+- We won’t use this feature
+- It’s possible to override the default authentication classes on a per-view basis
