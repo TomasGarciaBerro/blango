@@ -1,0 +1,44 @@
+
+* Intro
+- API responses came back with author id instead of its name
+
+* PrimaryKeyRelatedField
+- What we’ve been using so far
+- Default
+
+* StringRelatedField
+- rest_framework.serializers.StringRelatedField
+- Calls the __str__() method
+- It is read-only
+tags = serializers.StringRelatedField(many=True)
+
+* SlugRelatedField
+- This is intended to work with a SlugField of a related object, although it can work with any unique field
+tags = serializers.SlugRelatedField(
+        slug_field="value", many=True, queryset=Tag.objects.all()
+    )
+- We can also update the tags, provided a Tag with the given value already exists in the database
+
+* HyperlinkRelatedField
+- This field serializes a related object to a URL at which we can retrieve the full detail of the object
+- It requires the name of a view to be provided, and this is used to generate the URL by passing in the primary key of the related object
+author = serializers.HyperlinkedRelatedField(
+        queryset=User.objects.all(),
+        view_name="api_user_detail"
+    )
+- Vulnerable to enumeration attack (request all info)
+
+* Customizing HyperlinkRelatedField
+- Make change in the view, urls and add lookup_field="email" argument in serializer field
+- HyperlinkedRelatedField is read and write
+
+* Further customization of HyperlinkRelatedField
+- If you need to use two or more arguments in URL generation
+/api/v1/<author_email>/posts/<post_id>
+- We need to subclass HyperlinkedRelatedField and implement two methods. 
+1 get_url(self, obj, view_name, request, format), which will return the URL of the related object
+2 get_object(self, view_name, view_args, view_kwargs) which should use the view name and arguments to fetch the related object and return it
+
+
+
+
