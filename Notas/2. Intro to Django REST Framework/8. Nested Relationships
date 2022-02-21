@@ -1,0 +1,59 @@
+
+* Read-Only Nested Relationships
+- Creating a read-only nested relationship essentially just means using a Serializer subclass as a field
+class CommentSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+    creator = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = Comment
+        fields = ["id", "creator", "content", "modified_at", "created_at"]
+        readonly = ["modified_at", "created_at"]
+- To have different fields on different views, we can use different serializers for the same model
+class PostDetailSerializer(PostSerializer):
+    comments = CommentSerializer(many=True, read_only=True)
+
+* Read-Write Nested Relationships
+- In order to save a nested relationship, we need to implement the update() and/or create() method(s) on our main serializer (i.e. PostDetailSerializer in our case)
+- Any comment that doesn’t have an id field set as a new one, and add it to the Post
+- Add id to Serializer
+- Override it to set required to False
+- Get rid of the read_only
+comments = CommentSerializer(many=True, read_only=True)
+- Method in PostDetailSerializer
+def update(self, instance, validated_data):
+        #remove the comments from the validated_data
+        comments = validated_data.pop("comments")
+
+        #the instace updated
+        instance = super(PostDetailSerializer, self).update(instance, validated_data)
+
+        for comment_data in comments:
+            if comment_data.get("id"):
+                # comment has an ID so was pre-existing
+                continue
+            comment = Comment(**comment_data)
+            comment.creator = self.context["request"].user
+            comment.content_object = instance
+            comment.save()
+
+        return instance
+
+* Automatically Creating Related Objects
+- We'll subclass SlugRelatedField to create our new field
+- Then, we’ll override its to_internal_value() method
+- This method takes the value that was provided in the API, then converts it into a value to save on the model
+class TagField(serializers.SlugRelatedField):
+    def to_internal_value(self, data):
+        try:
+            return self.get_queryset().get_or_create(value=data.lower())[0]
+        except (TypeError, ValueError):
+            self.fail(f"Tag value {data} is invalid")
+- fail() method is just a shortcut method that DRF provides, to raise a ValidationError
+
+
+
+
+
+
+
