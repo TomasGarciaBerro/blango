@@ -1,0 +1,51 @@
+
+* Adding Permissions to Views
+- DRF provides a few helpful classes to add common types of permissions restrictions to views
+- They’re all importable from rest_framework.permissions
+- Some of them are:
+- AllowAny: Allow full access without authentication. This is the default, as we’ve seen in our APIs.
+- IsAuthenticated: Allow full access to any authenticated user.
+- IsAdminUser: Allow access to any user who has is_staff of True.
+- IsAuthenticatedOrReadOnly
+- We can apply permissions classes globally with Django settings, or to views themselves
+- Permissions applied to views override the default settings.
+- To set them on the views we have to set the permission_classes attribute
+class PostList(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+
+* Model Permissions
+- Another way
+- DRF also provides classes that are designed to work with the Django model permissions
+
+* Custom Permission Classes
+- We can create our own permission class
+- The permission class must inherit from rest_framework.permissions.BasePermission
+- Two methods
+1 has_permission
+- Must return True or False
+class ExampleComOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        email = getattr(request.user, "email", "")
+        return email.split("@")[-1] == "example.com"
+2 has_object_permission
+class AuthorModifyOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return request.user == obj.author
+- permissions.SAFE_METHODS is a tuple that contains methods that don’t perform updates
+- If the request method is one of these, then we’ll just return True, which means any user can make these requests.
+- Otherwise we’ll check if the obj (a Post instance) has an author that matches the current user
+- This methos is only called in details views
+
+* Combining Permissions
+- Permissions classes that inherit from BasePermission can be combined using the bitwise operators & (and), | (or), and ~ (not)
+- Caution: when combining your permission classes with the DRF provided classes
+- The provided classes only implement the has_permission() method for their permission checks
+- has_object_permission() siempre True
+- Provided classes son las que importas
+- Always subclass to change the has_object_permission() methos
+class IsAdminUserForObject(permissions.IsAdminUser):
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user and request.user.is_staff)
