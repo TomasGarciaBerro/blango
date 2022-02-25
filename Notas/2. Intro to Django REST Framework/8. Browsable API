@@ -1,0 +1,13 @@
+
+* Basic customization
+- Most of the time, you won’t need to customize the DRF GUI at all
+- DRF uses the Bootstrap CSS framework
+- If you do want to customize the DRF GUI, most often it will be to show your own branding
+
+* Swagger UI
+- Swagger is a third-party tool that generates a browsable API from an OpenAPI specification
+- This is an open standard, so many different APIs can generate API documents in the correct format, and use Swagger to build the UI
+- Consider providing a Swagger UI that other developers will be more familiar with than DRF’s built-in one
+
+
+
