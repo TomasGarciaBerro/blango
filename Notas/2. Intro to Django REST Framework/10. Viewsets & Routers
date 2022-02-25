@@ -1,0 +1,82 @@
+
+
+* Viewsets
+- They are a DRF feature
+- It allows you to define a single class which will handle both the list and detail API for a given model
+- Subclass rest_framework.viewsets.ViewSet
+- Implement the action methods you want the viewset to respond to
+- Each method should return a rest_framework.response.Response instance
+- Like what we used when we first built our function-based DRF API
+class TagViewSet(viewsets.ViewSet):
+    def list(self, request):
+        queryset = Tag.objects.all()
+        serializer = TagSerializer(queryset, many=True)
+        return Response(serializer.data)
+- ModelViewSet nos ahorra mas codigo todavia
+- Implements list, create, retrieve, update and destroy
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+- We need to set up mappings from HTTP methods to our viewset methods
+tag_list = TagViewSet.as_view({
+    "get": "list",
+    "post": "create"
+})
+
+tag_detail = TagViewSet.as_view({
+    "get": "retrieve",
+    "put": "update",
+    "patch": "partial_update",
+    "delete": "destroy"
+})
+
+path("tags/", tag_list, name="tag_list"),
+path("tags/<int:pk>/", tag_detail, name="tag_detail"),
+
+- Esta ultima parte es de lo que se encargan los routers
+
+* Routers
+- DRF Router will inspect a viewset and determine what endpoints it has available, then create the right URL patterns automatically
+rest_framework.routers.DefaultRouter
+rest_framework.routers.SimpleRouter
+- DefaultRouter will also include a default base route with no prefix, which returns a list of links to the registered viewsets
+- It also adds the format routes
+- Steeps to use a router
+1 router = DefaultRouter()
+2 router.register("tags", TagViewSet)
+- Donde "tags" va a ser el path
+3 path("", include(router.urls)),
+- Nos va a traer todo lo que registremos
+
+* Customizing Viewsets
+- We can convert views to viewsets
+- Para Post vamos a necesitar ver como hacemos para usar 2 serializers
+- Uno para detail y otro para list
+- Implementamos este method en la viewset
+class PostViewSet(viewsets.ModelViewSet):
+    permission_classes = [AuthorModifyOrReadOnly | IsAdminUserForObject]
+    queryset = Post.objects.all()
+
+    def get_serializer_class(self):
+        if self.action in ("list", "create"):
+            return PostSerializer
+        return PostDetailSerializer
+- How are the URLs that a router generates, named?
+- Name of model and then the suffixes -list and -detail are added
+- We could customize this by providing a basename string as the third argument to the register() method
+
+* Extra Viewset Actions
+- Extra methods that can be added with their own URL
+- The methods are implemented on the viewset
+- The method will accept a request, and optionally, the pk of the object
+- We also need to decorate the method with the rest_framework.decorators.action functio
+@action(methods=["get"], detail=True, name="Posts with the Tag")
+- ModelViewSet class provides a helper method get_object()
+- It fetchs the Tag object from the database
+
+* Drawbacks of Viewsets and Routers
+- one size fits all
+
+
+
+
