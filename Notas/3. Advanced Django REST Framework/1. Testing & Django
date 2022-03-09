@@ -1,0 +1,78 @@
+
+* Unit testing
+- Is the process of writing automated tests for your code
+- Normally grouped into test cases, represented by a TestCase subclass
+- The method name must start with test_
+- The actual validation of results is done using assertions
+assertEqual(), assertNotEqual(), assertTrue(), assertFalse(), assertIn(), assertNotIn(), assertIsInstance()
+
+* Django test client class: django.test.Client
+- To make requests to your Django views in a test
+- It doesn’t require the Django development server to be running
+self.client.post(
+    "/accounts/login/", {"username": "testuser", "password": "password"}
+  )
+- To test our API, we need to add some additional parameters when making requests
+- Requests that send data in the body
+class RestTestCase(TestCase):
+    def test_post_create(self):
+        resp = self.client.post(
+            "/api/v1/posts/",
+            json.dumps({"content": "Post Content", "slug": "post-slug", ...}),
+            HTTP_AUTHORIZATION="Token abc1234def567",
+            content_type="application/json",
+        )
+        data = resp.json()
+        self.assertEqual(data["slug"], "post-slug")
+- RequestFactory can generate Request objects that can be directly passed to views to test them
+- DRF provides a subclass of RequestFactory called APIRequestFactory
+
+* Testing GETs with APIClient
+- Instead of using Django’s standard client, DRF provides a client with a similar interface we can use in its place
+- It’s called APIClient, importable from rest_framework.test
+- setUp() method is called before each test method is called, and can be used for setting up the test class or inserting data into the test database
+
+* Authenticating with APIClient
+- login() method to log our client in
+- This stores the login information in the session, so this method only works if you have SessionAuthentication enabled for DRF
+self.client.login(email="test@example.com", password="test@example.com")
+- Login in the setUp() method
+self.client.logout()
+- To test unauthorized responses 
+- We can also use basic or token authentication, by using the client.credentials() method
+import base64
+credentials = base64.b64encode("test@example.com:password".encode("ascii"))
+auth_header = "Basic " + credentials.decode("ascii")
+self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+- To unset credentials, we just call credentials() with no arguments
+token = "4510a3fdd351d2a35059e9724fa4bdbb643f4325cd8f6696298f80efbaf4d2c9"
+auth_header = "Token " + token
+client.credentials(HTTP_AUTHORIZATION=auth_header)
+- Or without Token
+class PostApiTestCase(TestCase):
+    def setUp(self):
+        self.u1 = get_user_model().objects.create_user(
+            email="test@example.com", password="password"
+        )
+
+        self.client = APIClient()
+        token = Token.objects.create(user=self.u1)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+
+* Sending data with APIClient
+class PostApiTestCase(TestCase):
+    def test_post_create(self):
+        post_dict = {
+            "title": "Test Post",
+            "slug": "test-post-3",
+            "summary": "Test Summary",
+            "content": "Test Content",
+            "author": "http://testserver/api/v1/users/test@example.com",
+            "published_at": "2021-01-10T09:00:00Z"
+        }
+        resp = self.client.post("/api/v1/posts/", post_dict)
+
+        post_id = resp.json()["id"]
+        post = Post.objects.get(id=post_id)
+
