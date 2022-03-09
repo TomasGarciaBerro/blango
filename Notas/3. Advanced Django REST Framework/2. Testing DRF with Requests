@@ -1,0 +1,22 @@
+
+
+* RequestsClient
+- Run automated tests against a real HTTP server
+- rest_framework.test.RequestsClient
+- It has the same interface as the APIClient, except it takes the full URL rather than just a path
+- Diferencias
+self.client = RequestsClient()
+resp = self.client.get(self.live_server_url + "/api/v1/tags/")
+- Hacemos subclass de django.test.LiveServerTestCase
+
+* Authentication with RequestsClient
+- Basic
+self.client.auth = HTTPBasicAuth("testuser@example.com", "password")
+- Token
+token_resp = self.client.post(
+      self.live_server_url + "/api/v1/token-auth/",
+      {"username": "testuser@example.com", "password": "password"},
+  )
+  self.client.headers["Authorization"] = "Token " + token_resp.json()["token"]
+
+
