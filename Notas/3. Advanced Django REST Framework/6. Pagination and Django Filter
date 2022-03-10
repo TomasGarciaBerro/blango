@@ -1,0 +1,111 @@
+
+
+* DRF Third-Party Libraries
+- django-filter: adds extensible filtering support
+- SimpleJWT: for authentication with JSON web tokens
+- django-versatileimagefield: adds some enhancements to image management.
+
+* DRF Pagination
+
+1 PageNumberPagination class 
+- Treats the list results as a page
+- Clients can move through the results by specifying a page
+/api/v1/posts/?page=2
+- We can subclass PageNumberPagination and set attributes to customize the behavior
+- In setting.py, for global aplication
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 100
+}
+- Or in specific views, for more customization
+class PostViewSet(viewsets.ModelViewSet):
+    pagination_class = PageNumberPagination
+
+
+2 LimitOffsetPagination class 
+- Works like paginating a SQL query
+- First 100 results: /api/v1/posts/?offset=0&limit=100
+- Next 100 results: /api/v1/posts/?offset=100&limit=100
+- We can subclass LimitOffsetPagination and set attributes to customize the behavior
+- Also it can be set globally with the DEFAULT_PAGINATION_CLASS setting of rest_framework.pagination.LimitOffsetPagination
+- Or, it can be manually set on a view or viewset class with the pagination_class attribute
+
+
+3 CursorPagination class
+- Uses a special cursor query parameter to page through the results
+{
+    "next": "http://127.0.0.1:8000/api/v1/posts/?cursor=cD1hZHZhbmNlZC1kamFuZ28tYS1yZXZpZXc%3D",
+    "previous": "http://127.0.0.1:8000/api/v1/posts/?cursor=cj0xJnA9YWR2YW5jZWQtZGphbmdvLWEtcmV2aWV3",
+    "results": [
+        {
+           ... list of results
+        }
+    ]
+}
+- Model must have a unique field that can be ordered on
+- By default, DRF looks for a date and time field called created
+- Used when working with very large datasets
+- Can be subclassed for customazation
+- Also can be set globally with the DEFAULT_PAGINATION_CLASS setting of rest_framework.pagination.CursorPagination
+- Or, it can be manually set on a view or viewset class with the pagination_class attribute
+
+* Pagination Response
+- It’s best to enable pagination early on in a project, as it can break clients that don’t expect a paginated response
+{
+    "count": 11,
+    "next": "http://127.0.0.1:8000/api/v1/posts/?page=2",
+    "previous": null,
+    "results": [
+        #list of results
+    ]
+}
+
+* Django-Filter Introduction
+- django-filter provides methods of filtering querysets
+- Filter backends can be set globally in the REST_FRAMEWORK settings
+- Or, they can be applied to individual views and viewsets with the filter_backends
+django_filters.rest_framework.DjangoFilterBackend
+- django_filters needs to also be added to INSTALLED_APPS in the settings file
+- To get simple equality-based filtering, we just need to define a list of fields that we want to be able to filter on
+- These are set as the filterset_fields attribute
+
+* The FilterSet Class
+- Behind the scenes, DjangoFilterBackend is actually using the filterset_fields attribute to build a FilterSet (django_filters.rest_framework.FilterSet) class
+- This is a class that defines the filters that can be used on a view or viewset
+class PostFilterSet(filters.FilterSet):
+    published_from = filters.DateFilter(
+        field_name="published_at", lookup_expr="gte", label="Published Date From"
+    )
+    published_to = filters.DateFilter(
+        field_name="published_at", lookup_expr="lte", label="Published Date To"
+    )
+- Other filters
+CharFilter: for strings.
+BooleanFilter: for filtering by boolean, valid values are True, true and 1 for true, or False, false and 0 for false.
+ChoiceFilter: filter based on a list of available choices. 
+Choices are set in the same manner as a the ChoiceField for a model: with a list of tuples containing the value and a label, passed in as the choices keyword argument.
+UUIDFilter: accepts a UUID as a string.
+DateFilter: accepts a date.
+DateTimeFilter: accepts a date and time.
+TimeFilter: accepts a time.
+- Related fields can be searched on too
+author_email = filters.CharFilter(
+    field_name="author__email",
+    lookup_expr="icontains",
+    label="Author Email Contains",
+)
+- icontains for contains instead of exact match and the i is for case insensitive
+
+* Ordering
+rest_framework.filters.OrderingFilter
+- In settings.py
+"DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter"
+- In views we can customize which fields (default is all readable and serialized fields)
+class PostViewSet(viewsets.ModelViewSet):
+    ordering_fields = ["published_at", "author", "title", "slug"]
+- Multiple orderings
+?ordering=author,-published_at
+
+
