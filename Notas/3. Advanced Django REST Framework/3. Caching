@@ -1,0 +1,22 @@
+
+
+* View Caching
+- cache_page(): caches the response from a view for a certain number of seconds.
+- vary_on_headers(): lets Django know that the response from the view can change based on headers, and so the cache key should take the given header into account.
+- vary_on_cookie: a shortcut for vary_on_headers("Cookie")
+- These decorators can be applied to DRF views and they’ll work just the same as they do on regular Django views
+- Applying them to class-based views is just a little different though
+- Decorator functions must first be wrapped in the django.utils.decorators.method_decorator function
+- For a view which changes based on the user
+- vary_on_headers("Authorization") and vary_on_cookie decorators
+- Both wrapped in method_decorator
+@method_decorator(cache_page(300))
+@method_decorator(vary_on_headers("Authorization"))
+@method_decorator(vary_on_cookie)
+
+* Caching Generic Views and Viewsets
+@method_decorator(cache_page(300))
+    def get(self, *args, **kwargs):
+        return super(UserDetail, self).get(*args, *kwargs)
+- We just implement the methos and do a pass-through to the 
+
