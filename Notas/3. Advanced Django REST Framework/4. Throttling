@@ -1,0 +1,63 @@
+
+
+* What is Throttling?
+- No matter how we choose to host our Django application, we’re always going to be resource-limited at some point
+- To prevent resource usage from ballooning out of control, we can implement throttling on our API
+- Throttling: limiting the amount of requests that clients can make
+- Throttling is determined by two different rates, a burst rate and a sustained rate
+- 60 requests per minute, and 1,000 requests per day
+
+* DRF Throttling Overview
+- It stores the rate limit information in the Django default cache
+- It must be set up in settings.py
+- DRF throttles are implemented using throttle classes
+- rest_framework.throttling.AnonRateThrottle class to define limits for anonymous users
+- rest_framework.throttling.UserRateThrottle for logged-in users
+
+* Burst and Sustained Rates
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+
+class AnonSustainedThrottle(AnonRateThrottle):
+    scope = "anon_sustained"
+
+class AnonBurstThrottle(AnonRateThrottle):
+    scope = "anon_burst"
+
+class UserSustainedThrottle(UserRateThrottle):
+    scope = "user_sustained"
+
+class UserBurstThrottle(UserRateThrottle):
+    scope = "user_burst"
+
+- In settting.py
+REST_FRAMEWORK = {
+    # existing settings omitted
+    "DEFAULT_THROTTLE_CLASSES": [
+        "blog.api.throttling.AnonSustainedThrottle",
+        "blog.api.throttling.AnonBurstThrottle",
+        "blog.api.throttling.UserSustainedThrottle",
+        "blog.api.throttling.UserBurstThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon_sustained": "500/day",
+        "anon_burst": "10/minute",
+        "user_sustained": "5000/day",
+        "user_burst": "100/minute",
+    },
+}
+
+* ScopedRateThrottle
+- In the views.py
+class UserDetail(generics.RetrieveAPIView):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "post_api"
+- In settings.py we add in "DEFAULT_THROTTLE_RATES" both throttles
+
+* Custom Throttling
+- Write your own throttling classes and override the allow_request() method: return True or False to allow or deny the request
+import random
+
+class RandomRateThrottle(throttling.BaseThrottle):
+    def allow_request(self, request, view):
+        return random.randint(1, 10) != 1
+
