@@ -1,0 +1,46 @@
+
+* Queryset
+- Static querysets: queryset attribute is defined on the class and doesn’t differ for each request
+- Filtering data requires changing the queryset that is used to build a response
+- To change the queryset that’s used by the view, we can implement the get_queryset() method
+
+* User-Based Filtering
+from django.db.models import Q
+from django.utils import timezone
+
+class PostViewSet(viewsets.ModelViewSet):
+    # we'll still refer to this in `get_queryset()`
+    queryset = Post.objects.all()
+
+    def get_queryset(self):
+        if self.request.user.is_anonymous:
+            # published only
+            return self.queryset.filter(published_at__lte=timezone.now())
+
+        if not self.request.user.is_staff:
+            # allow all
+            return self.queryset
+
+        # filter for own or
+        return self.queryset.filter(
+            Q(published_at__lte=timezone.now()) | Q(author=self.request.user)
+        )
+
+* URL-Based Filtering
+- Add in urls.py
+path(
+        "posts/by-time/<str:period_name>/",
+        PostViewSet.as_view({"get": "list"}),
+        name="posts-by-time",
+    ),
+- We can access it in our get_queryset() method in views.py through kwargs dict
+time_period_name = self.kwargs.get("period_name")
+
+* Query Parameter Filtering
+- We can access query parameters in get_queryset() using the self.request.query_params dictionary
+- Better to use third-party package django-filter
+
+
+
+
+
