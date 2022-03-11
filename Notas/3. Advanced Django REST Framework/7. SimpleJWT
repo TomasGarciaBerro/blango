@@ -32,7 +32,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b
 - Accepts user credentials (e.g. username or email address, and password), then returns an access token and refresh token
 2 rest_framework_simplejwt.views.TokenRefreshView
 - This view accepts a refresh token and returns a new access token
-
+path("jwt/", TokenObtainPairView.as_view(), name="jwt_obtain_pair"),
+path("jwt/refresh/", TokenRefreshView.as_view(), name="jwt_refresh"),
+    
 - Once you have an access token, you can use it in the Authorization HTTP header
 - With "Bearer" prefix
 - By default, SimpleJWT generates access tokens which are only valid for five minutes
