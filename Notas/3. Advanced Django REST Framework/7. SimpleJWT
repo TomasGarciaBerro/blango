@@ -1,0 +1,50 @@
+
+
+* JWT Introduction
+- JWT stands for JSON Web Token
+- It is a way of encoding authorization information into JSON structure
+- JWTs consist of three parts: header, payload and signature
+- Header
+{
+  "alg": "HS256",
+  "type": "JWT"
+}
+- The payload can consist of any data you want, user si o si
+{
+  "user_pk": 1,
+  "token_type": "access",
+  "exp": 1630462029
+}
+- The signature is generated using a hash function as specified in the header, in our case a function called HMACSHA256
+- For a JWT, the input value to the HMAC256 is the base-64 encoded header, and the base-64 encoded payload, joined with a "."
+- The secret that’s used is kept private. Sirve para que no puedan editar el payload.
+- The three parts of the JWT, they’re joined together with a . between each component
+- To authenticate using JWT, the client sends the token in the Authorization HTTP header, usually with a Bearer prefix
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjMwNDYyMDI5fQ.r8-OzTcodLgFSk1iEjFQc_i9aqyd6l84qNfhcw78bd8
+- The server can then decode the token, verify the signature and log in the user based on the information in the token
+- JWTs can be moved around between systems and validated even without talking to the system that generated the JWT originally
+
+* SimpleJWT Setup
+- Install with pip
+- Add rest_framework_simplejwt.authentication.JWTAuthentication to the list of DEFAULT_AUTHENTICATION_CLASSES in the REST_FRAMEWORK settings
+- Set up URL patterns to point to two provided views
+1 rest_framework_simplejwt.views.TokenObtainPairView
+- Accepts user credentials (e.g. username or email address, and password), then returns an access token and refresh token
+2 rest_framework_simplejwt.views.TokenRefreshView
+- This view accepts a refresh token and returns a new access token
+
+- Once you have an access token, you can use it in the Authorization HTTP header
+- With "Bearer" prefix
+- By default, SimpleJWT generates access tokens which are only valid for five minutes
+- We can use the refresh token, which is valid for one day, to get a new access token
+
+* SimpleJWT Settings
+- Settings customazation
+- They are all contained in a dictionary called SIMPLE_JWT in settings.py – similar to the REST_FRAMEWORK settings dictionary
+ACCESS_TOKEN_LIFETIME
+REFRESH_TOKEN_LIFETIME
+ROTATE_REFRESH_TOKENS
+BLACKLIST_AFTER_ROTATION
+SIGNING_KEY -> Default is Django SECRET_KEY pero mejor que sean independientes
+LEEWAY
+AUTH_HEADER_TYPES -> Change Bearer for JWT
