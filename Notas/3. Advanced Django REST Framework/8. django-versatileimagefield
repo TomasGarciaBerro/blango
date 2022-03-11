@@ -1,0 +1,18 @@
+
+
+* Intro
+- Django has its own ImageField model field, designed to make it easy to attach an image to your model
+- The ImageField itself just stores a path to the file in the database
+- django-versatileimagefield is a library that provides a drop-in replacement for ImageField: VersatileImageField
+versatileimagefield.fields.VersatileImageField
+- It provides helper methods to generate thumbnails, crop images, and apply filters
+- PPOIField: Primary Point of Interest
+- Stores the coordinates of the “point of interest” of the image
+- To use an ImageField in a template, we’d access its url attribute
+<img src="{{ post.hero_image.url }}"/>
+<img src="{{ post.hero_image.crop.100x100.url }}"/>
+<img src="{{ post.hero_image.thumbnail.100x100.url }}"/>
+
+* Set it up
+pip3 install django-versatileimagefield
+
