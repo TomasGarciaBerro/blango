@@ -1,0 +1,42 @@
+
+
+* JSX Intro
+- React.createElement() makes it hard to tell at a glance how the element will actually look on the page
+- JSX lets us mix HTML and JavaScript in the same file
+- Quicker to write and easier to read
+- Version de lo anterior en JSX
+return <button
+  className="btn btn-primary mt-2"
+  onClick={
+    () => {
+      this.handleClick()
+    }
+  }
+>
+  {buttonText}
+</button>
+- String properties, like className, can be passed in double quotes
+- Properties that aren’t strings should be passed using curly braces {}
+- Variables should be rendered inside curly braces
+- We need a pre-processor called Babel to process the script before it’s interpreted
+
+* Babel
+- It compiles JSX to JavaScript
+- It’s not as fast as pre-compiling everything
+- To set up include this before our JS that need to be compiled
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+- Then we need to add the attribute type="text/babel" to any <script>s that we want to be compiled
+
+* Implementing Post Table Components
+- It’s made up of two Component classes: PostRow and PostTable
+- We will use props
+- This is an object that contains all the properties/attributes that were passed to the component
+- props object will contain just one item: post, which is a Post object fetched from the Post API
+- We’re able to call JavaScript code inside curly braces
+- The state has two items in it
+1 dataloaded: It should default to false and when data is loaded from API changed to true
+2 data: An array of results
+
+* Definitions
+- State is internal to a component
+- While props is external information passed to the component
