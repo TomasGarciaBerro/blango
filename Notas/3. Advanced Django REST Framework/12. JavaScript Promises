@@ -1,0 +1,43 @@
+
+
+* Promise Intro & Purpose
+- Their purpose is to provide a method of performing asynchronous code, or running code in the background
+- JavaScript doesn’t have a threading model, it accomplishes it with callbacks
+- They do this with a consistent interface that allows a promise to be resolved (complete successfully) or (optionally) rejected (fail)
+- We’re going to use promises when we fetch data from our API
+- Promise class
+
+* Promise Construction
+- Promises work because functions can be passed around in JavaScript
+- We need at least two, and sometimes three functions to implement a Promise
+- The first is the function that actually does the work
+- Rather than return a result, 
+- The worker function will call a function with the result, to “resolve” the promise
+- If there’s a failure in the worker function, then it might also be able to “reject” the promise
+- The function we pass to the Promise class must only take resolve and reject functions as parameters
+- We could not pass a function to Promise that takes the numbers to add and the resolve and reject functions
+- resolve function accepts a single argument, a result
+- reject function also accepts a single argument, a string as an error message
+- doAdd can access lazyAdd variables because its an arrow function wraped by lazyAdd
+- lazyAdd() is the first callback
+
+* Executing promises
+- As consumers we need to define two callback functions
+- To use lazyAdd we use the then() method on a Promise
+- Once the then() method is called, whether it resolves or rejects, the Promise is then called settled
+function resolvedCallback(data) {
+  console.log('Resolved with data: ' +  data)
+}
+function rejectedCallback(message) {
+  console.log('Rejected with message: ' + message)
+}
+lazyAdd(3, 4).then(resolvedCallback, rejectedCallback)
+- Perform a lazy add and then call my callbacks resolvedCallback or rejectedCallback
+
+* Aditional Notes
+- JavaScript is an asynchronous language
+- JavaScript does not fully execute a command before starting the next one
+- In JavaScript, the next command can be executed before the previous command has finished
+- Promises allow you to execute the next command once the first command has finised
+
+
