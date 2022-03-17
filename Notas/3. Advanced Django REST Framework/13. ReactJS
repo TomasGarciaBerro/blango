@@ -1,0 +1,96 @@
+
+
+* Intro and Purpose
+- ReactJS is a JavaScript framework for building user interfaces
+- These interfaces are composed of different components
+- Each component has an internal state and knows how to render itself
+- Components may have child components, and data is passed between components using properties – kind of like arguments to a function
+- With React, to keep the UI and data state in sync, we just need to update the component’s state, and it knows if it needs to be re-rendered, and its render() method is called automatically
+
+* Adding React to a Website
+- You could build the entirety of your UI with it, and dont even use Django templating entirely
+- Or, you can just include the ReactJS script files on pages in which you want to have some interactivity
+- We’re going to use the second approach
+- We must include the ReactJS scripts in an HTML page, and then our scripts further down the page as to be able to access the ReactJS methods
+- Include these
+<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+- In production replace development with production.min
+- Add an element to contain the React components
+<div id="react_root"></div>
+
+* Building React Elements
+- React components are the classes that contain the state, event handlers and render methods
+- What are rendered on the page are actually React elements
+- Better to use function-based components as they are more performant
+- Here we will use class-based ones
+- The component’s render() method should return a React element
+- The element can be created with the React.createElement() function
+- Takes 3 arguments
+1 Name of the element to create (div, span, etc.)
+2 An object (dictionary) of properties/attributes to set on the element
+3 List of children, single string or an array of strings
+- In properties we cant pass class as its a reserved keyword, instead we pass className
+- React.createElement is sometimes aliased to e, for example: const e = React.createElement
+React.createElement('button', { className: 'btn btn-primary' }, 'Click Me')
+
+* Building React Components
+- They are just classes that inherit from React.Component
+- At the minimum you need to implement the render() method, and usually add some state
+class ClickButton extends React.Component {
+  state = {
+    wasClicked: false
+  }
+
+  handleClick () {
+    this.setState(
+      {wasClicked: true}
+    )
+  }
+
+  render () {
+    let buttonText
+
+    if(this.state.wasClicked)
+      buttonText = 'Clicked!'
+    else
+      buttonText = 'Click Me'
+
+    return React.createElement(
+      'button',
+      {
+        className: 'btn btn-primary mt-2',
+        onClick: () => {
+          this.handleClick()
+        }
+      },
+      buttonText
+    )
+  }
+}
+- There is nothing special about the name handleClick
+- setState() method takes an object and updates the given fields in the component’s state
+- The state should only be updated using setState() because after the state is updated, then render() method is called automatically
+- onClick is the attribute that sets the handler that’s called when the button is clicked
+- Anonymous arrow function that in turn calls handleClick()
+
+* Mounting a Component
+- To mount a component onto the page (or the DOM) we use the ReactDOM.render() function
+- Takes two arguments
+1 A react element to render
+2 A DOM element in which to render it
+- To get a reference to DOM element, we’ll use the document.getElementById() method
+- Takes the ID of the element you want to retrieve as an argument
+- We have to reference to our <div> with id="react_root"
+- Then we can
+const domContainer = document.getElementById('react_root')
+ReactDOM.render(
+  React.createElement(ClickButton),
+  domContainer
+)
+- We use React.createElement() temporarily
+- In the next section we’ll look at replacing it with JSX
+
+
+
+
