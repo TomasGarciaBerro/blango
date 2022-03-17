@@ -1,18 +1,24 @@
-function sayHello(name) {
-  if (name === undefined) {
-      console.log('Hello, no name')
-  } else {
-       console.log('Hello, ' + name)
+class DelayedGreeter extends Greeter {
+  delay = 2000
+
+  constructor (name, delay) {
+    super(name)
+    if (delay !== undefined) {
+      this.delay = delay
+    }
+  }
+
+  greet () {
+    setTimeout(
+      () => {
+        this.showGreeting(this.getGreeting())
+      }, this.delay
+    )
   }
 }
 
-const name = 'Your Name'  // Put your name here
+const dg2 = new DelayedGreeter('Patchy 2 Seconds')
+dg2.greet()
 
-console.log('Before setTimeout')
-
-setTimeout(() => {
-    sayHello(name)
-  }, 2000
-)
-
-console.log('After setTimeout')
+const dg1 = new DelayedGreeter('Patchy 1 Second', 1000)
+dg1.greet()

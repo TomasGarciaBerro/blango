@@ -1,0 +1,35 @@
+
+
+* Intro
+- Unlike Python classes though, they can only inherit from one super class
+- The constructor method is called constructor, and is the equivalent of Python’s __init__
+- When instantiating a class, you must use the new keywords
+- this is the equivalent of self
+- this is not passed to every method like self
+- Method example
+greet () {
+  this.showGreeting(this.getGreeting())
+}
+- How the class is instantiated and used
+const g = new Greeter('Patchy')
+g.greet()
+
+* Inheritance, Attributes, and Arrow Functions
+- Inheritance is denoted with the extends keyword
+- super() is a special function that calls the method of the super class in which it’s used
+- Aca super(name) llama al contructor de Greeter
+- How to set a default value
+class DelayedGreeter extends Greeter {
+  delay = 2000
+
+  constructor (name, delay) {
+    super(name)
+    if (delay !== undefined) {
+      this.delay = delay
+    }
+  }
+- In traditional functions (function keyword), the context in which the function executes changes
+- Keyword this, inside a function, no longer refers to the class instance
+- It refers to the function itself. If we call this.showGreeting() it will fail as the function doesn’t have a showGreeting() method
+- Arrow function dont have this problem
+- It is preferable to use arrow function unless there is a reason not to
