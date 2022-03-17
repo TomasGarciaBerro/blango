@@ -1,0 +1,94 @@
+
+
+* Fetch Intro
+- fetch() is a function built into all modern browsers that performs HTTP requests
+- It uses a promise-based system to callback when results are received
+- It takes two arguments
+1 The URL
+2 Is not mandatory, and contains all the options for the request in an object (dict)
+- For a GET
+fetch('/api/v1/posts/')
+- For a POST
+fetch('/api/v1/posts/', {
+  method: 'POST',
+  body: data
+})
+https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+fetch('/api/v1/posts/').then(response => {
+  return response.json()
+}).then(data  => {
+  // do something with data, for example
+  console.log(data)
+})
+- json() method returns another Promise
+
+* Exceptions
+- Like Python, JavaScript has try/catch/finally error handling
+try {
+  throw new Error('Something went wrong)
+} catch(e) {
+  if (e instanceof TypeError) {
+    console.log('Got type error')
+    console.log(e)
+  } else {
+    console.log('Got Exception')
+    console.log(e)
+  }
+} finally {
+  console.log('This is always called')
+}
+- throw instead of raise
+- catch instead of except
+- To add exception handling to a fetch() and JSON decode chain, we’d just call catch() at the end
+fetch('/api/v1/posts/').then(response => {
+  if (response.status !== 200) {
+    throw new Error('Invalid status from server: ' + response.statusText)
+  }
+  return response.json()
+}).then(data  => {
+  // do something with data, for example
+  console.log(data)
+}).catch(e => {
+  console.error(e)
+})
+
+* React Component Events
+- Throughout the lifecycle of a React component, the React library will call a few methods on it as events take place
+- Most common are:
+1 componentDidMount()
+- Takes no arguments
+- It is called right after the component is inserted into the DOM
+- Used for example to start the fetch from the Post API
+2 componentDidUpdate()
+- It is called when the properties being passed to a component change
+- It would happen when the parent component re-renders and passes a different value for a property to the child component
+- Takes three arguments
+1 prevProps: The props object that the component had prior to being updated
+2  prevState: The state object that the component had prior to being updated
+3 snapshot: This is the result of the getSnapshotBeforeUpdate() method, which is invoked just before the rendered component is updated in the DOM
+- Normally you wouldn’t implement getSnapshotBeforeUpdate() as you can get the changes by comparing using prevProps and prevState
+- For this reason, snapshot will be null
+3 componentWillUnmount()
+- It is called directly before the component unmounts (is removed from the DOM)
+- You could use this method to cancel any promises that are outstanding, for example, stopping an ongoing network request
+
+* Passing Variables from Django
+- To pass variables through from Django, we need to just render them in the template
+- However it’s not safe to just render them as is
+- Django provides a couple of template filters to help with this (|escapejs)
+- For simple values, use the escapejs tag
+const url = '{{ url|escapejs }}'
+- To pass a whole Python dictionary to JavaScript, you should use the json_script filter
+- The filter takes a single argument, which is the id attribute to set on the <script>
+{{ config|json_script:"config-data" }}
+- To parse data back out
+const configElement = document.getElementById('config-data')
+const encodedConfig = configElement.textContent
+const config = JSON.parse(encodedConfig)
+
+// use values from the config object
+const url = config.url
+
+* Further Enhancements
+- Right now our React post table doesn’t have any advantages over just building a table in plain HTML
+
