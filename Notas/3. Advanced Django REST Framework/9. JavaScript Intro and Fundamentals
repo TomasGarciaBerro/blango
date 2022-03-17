@@ -1,0 +1,37 @@
+
+
+* Including JavaScript on a page
+- Inline inside an HTML file
+<script>
+    console.log('Hello, world!')
+</script>
+- Include JavaScript from an external file
+<script src="/static/js/script.js"></script>
+- <script>s are included at the end of the page because of the references
+
+* Variables in JavaScript
+- Use let for variables whose value might change
+- Use const for variables whose value won’t
+- const values can’t be reassigned
+- const are allowed to be mutated (add items to an array)
+- var is an old way -> it isnt recommended
+
+* Syntax
+- Lines can optionally be terminated with a semicolon (;)
+- Strings can use double or single quotes
+- if statement
+if (name === 'Ben') {
+    benCount = 1
+}
+- === means that the types of the items being compared are taken into comparison
+- single-line comments in JavaScript start with a //
+- This is not valid, it is being redefined not reasigned
+let fruitCount = 5
+let fruitCount = 6
+- object keys don’t need to be quoted
+{Apple: 0, 'Banana': 1}
+- dict en JS se llaman Objects
+
+
+
+
