@@ -1,0 +1,81 @@
+
+
+* Console Logging
+- Logging to the browser console
+console.log('Hello, world')
+- Other methods
+error()
+warn()
+count('foo'): Count of how many times it has been called with that label
+time('myTimer')
+Endtime('myTimer')
+
+* Functions
+function addNumbers(a, b) {
+    return a + b
+}
+- Convention for variables and function names is camelCase
+- Whereas in Python we’d usually use snake_case
+- Arguments to JavaScript functions are implicitly all optional
+- If a variable is === to undefined, it means it hasn’t been passed in
+- Another way to define functions
+const sayHello = function(name) {
+    if (name === undefined) {
+        console.log('Hello, no name')
+    } else {
+        console.log('Hello, ' + name)
+    }
+}
+- This way is useful if you want to nest functions inside other functions and follow the variable scoping rules that we saw in the last section
+- Third way: Anonymous or arrow functions
+const sayHello = (name) => {
+  if (name === undefined) {
+      console.log('Hello, no name')
+  } else {
+       console.log('Hello, ' + name)
+  }
+}
+- => vs function keyword: The context in which the function executes is different
+- Arrow function also allows us to define lambda functions
+- This are basic one-line functions that implicitly return a value
+const doubler = (x) => { return x * 2 }
+const doubler = x => x * 2
+- Espera 2000ms y llama a la funccion
+const name = 'Ben'
+setTimeout(() => {
+    sayHello(name)
+  }, 2000
+)
+- A JavaScript paradigm, is the judicious use of callback functions and asynchronous code
+
+* Loops
+- For loop has 4 parts:
+1 An Initializer, which is executed when the loop starts.
+2 A condition, which is checked before each loop iteration. The loop only continues if the condition is true, otherwise the loop stops.
+3 An advancement statement, which is executed at the end of each iteration to change the state of variables.
+4 A loop body that is executed each iteration
+- All parts of the for loop are optional
+for(let i = 0; i < 10; i += 1) {
+  console.log(i)
+}
+- While loop
+let i = 0
+while(i < 10) {
+  console.log(i)
+  i += 1
+}
+- Do-while Loops
+- Primero ejecuta y dsp chequea la condicion
+let i = 10
+do {
+  console.log(i)
+  i += 1
+} while(i < 10)
+- Other iterators
+- forEach() executes a function for each item in the array
+- Ejecuta funcion
+- map() also executes a function for each item in the array, but returns a new array of the same size, which contains the result(s) of the function
+- Cambiada componetes del array
+
+
+
